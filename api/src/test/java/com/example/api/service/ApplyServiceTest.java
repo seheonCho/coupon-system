@@ -1,18 +1,19 @@
 package com.example.api.service;
 
+import static com.example.api.util.constant.RedisConst.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.api.repository.CouponCountRepository;
 import com.example.api.repository.CouponRepository;
 
 @SpringBootTest
@@ -24,6 +25,9 @@ class ApplyServiceTest {
 	@Autowired
 	private CouponRepository couponRepository;
 
+	@Autowired
+	private CouponCountRepository couponCountRepository;
+
 	@Test
 	@DisplayName("한번만 응모")
 	void applyOneTimes() {
@@ -34,11 +38,15 @@ class ApplyServiceTest {
 		assertThat(count).isEqualTo(1);
 	}
 
+	@BeforeEach
+	void beforeEach() {
+		couponCountRepository.flush(COUPON_INCREMENT_KEY);
+	}
+
 	@Test
 	@DisplayName("여러명 응모")
 	void applyManyTimes() throws InterruptedException {
 	    int threadCount = 1000;
-
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
 		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
